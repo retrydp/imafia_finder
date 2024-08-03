@@ -2,8 +2,7 @@ const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
 
 const playersPerTable = 10; //default mafia players count
-const urlBase = (id) => `https://imafia.org/tournament/${id}`;
-const tournamentId = '740'; //'703';
+const urlBase = `https://imafia.org/tournament/740`;
 
 const selector =
   '#tournament-results > div > div > div > div > div.games_item_content > div > div > a:not(:empty)';
@@ -40,7 +39,7 @@ const getDom = (response, selector) => {
  * @returns {Promise<NodeList>} - The raw player data.
  */
 const getPlaysRawData = async () => {
-  const url = urlBase(tournamentId) + urlTail;
+  const url = urlBase + urlTail;
   const response = await getHtml(url);
   const gamesItem = getDom(response, selector);
 
@@ -55,19 +54,16 @@ const getPlaysRawData = async () => {
  * @returns {Object[]} - The generated games state.
  */
 const generateGamesState = (namesArray, gamesCount, tablesCount) => {
-  const gamesState = Array.from(
-    { length: gamesCount * tablesCount },
-    (_, idx) => {
-      const players = namesArray.slice(
-        idx * playersPerTable,
-        idx * playersPerTable + playersPerTable
-      );
-      const game = Math.floor(((idx / tablesCount) % gamesCount) + 1);
-      const table = (idx % tablesCount) + 1;
+  const gamesState = Array.from({ length: gamesCount }, (_, idx) => {
+    const players = namesArray.slice(
+      idx * playersPerTable,
+      idx * playersPerTable + playersPerTable
+    );
+    const game = Math.floor(((idx / tablesCount) % gamesCount) + 1);
+    const table = (idx % tablesCount) + 1;
 
-      return { game, table, players };
-    }
-  );
+    return { game, table, players };
+  });
 
   return gamesState;
 };
@@ -114,5 +110,5 @@ const getSpecificPlayerGames = async (player) => {
   return playerGames;
 };
 
-// getSpecificPlayerGames('Medved').then(console.log);
+//getSpecificPlayerGames('Medved').then(console.log);
 initState().then((data) => console.dir(data, { depth: null }));
